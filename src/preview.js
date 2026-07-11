@@ -48,10 +48,11 @@ export const ATTRIBUTE_ICONS = {
   `,
   match_counter: `
     <svg class="octagon-icon-svg" viewBox="0 0 100 100">
-      <path d="M35,20 L65,20 C65,20 65,50 50,68 C35,50 35,20 35,20 Z" fill="currentColor" opacity="0.4"/>
+      <path d="M35,20 L65,20 C65,20 65,50 50,68 C35,50 35,20 35,20 Z" fill="currentColor" opacity="0.6"/>
       <path d="M25,75 L75,25 L80,30 L30,80 Z" fill="currentColor"/>
       <path d="M20,80 L30,70 M15,75 L25,65" stroke="currentColor" stroke-width="5"/>
-      <path d="M35,20 L65,20 C65,20 65,50 50,68 C35,50 35,20 35,20 Z" fill="none" stroke="#ff9100" stroke-width="4" stroke-dasharray="4,4"/>
+      <circle cx="72" cy="28" r="16" fill="#141211" stroke="currentColor" stroke-width="2"/>
+      <path d="M72,20 L72,36 M64,28 L80,28" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
     </svg>
   `
 };
@@ -176,17 +177,14 @@ export function renderPreview(container, char) {
         
         <div class="preview-grid-stats">
           <div class="stat-item">
-            ${STATS_INFO.hp}
             <span class="stat-label">最大HP</span>
             <span class="stat-value">${char.stats.hp}</span>
           </div>
           <div class="stat-item">
-            <svg class="stat-icon" viewBox="0 0 24 24" fill="#ffd600" style="transform: rotate(45deg);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
             <span class="stat-label">速度</span>
             <span class="stat-value">${char.stats.speedMin}-${char.stats.speedMax}</span>
           </div>
           <div class="stat-item">
-            ${STATS_INFO.defense}
             <span class="stat-label">防御補正</span>
             <span class="stat-value">${char.stats.defCorrection >= 0 ? '+' : ''}${char.stats.defCorrection}</span>
           </div>
