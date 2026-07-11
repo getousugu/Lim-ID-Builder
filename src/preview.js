@@ -382,8 +382,9 @@ function renderSkillsList(skills, inlineDict, isDefenseTab = false) {
       coinsHTML += `<div class="coin-token ${isUnbreakable ? 'unbreakable' : ''}"></div>`;
     }
 
-    // Skill level indicator
-    const levelVal = parseInt(skill.atkLevel) || 0;
+    // 攻撃レベル補正（levelBonus を表示）
+    const levelBonusVal = parseInt(skill.levelBonus) || 0;
+    const levelBonusSign = levelBonusVal >= 0 ? '+' : '';
     
     // Weight indicator ■ squares
     const weightVal = parseInt(skill.weight) || 1;
@@ -441,11 +442,10 @@ function renderSkillsList(skills, inlineDict, isDefenseTab = false) {
       `;
     }
 
-    // Show Attack/Defense Level depending on role
+    // Show Attack/Defense type
     const isCounterType = isDefenseTab && (skill.defenseType === 'counter' || skill.defenseType === 'match_counter');
-    const showAtkTypeIcon = !isDefenseTab || isCounterType;
 
-    const levelTypeLabel = isDefenseTab && !isCounterType ? "防御レベル" : "攻撃レベル";
+    const levelTypeLabel = isDefenseTab && !isCounterType ? "防御レベル補正" : "攻撃レベル補正";
     const levelIcon = isDefenseTab && !isCounterType 
       ? `<svg class="level-sword-icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>`
       : WEAPON_ICON;
@@ -483,7 +483,7 @@ function renderSkillsList(skills, inlineDict, isDefenseTab = false) {
               </div>
             </div>
             <div class="level-bonus-flag" style="background-color: ${sinColor};">
-              +${skill.levelBonus || '0'}
+              +${skill.coinPower || '0'}
             </div>
           </div>
           
@@ -498,13 +498,13 @@ function renderSkillsList(skills, inlineDict, isDefenseTab = false) {
           </div>
         </div>
 
-        <!-- Meta info: Attack level, weight, etc. -->
+        <!-- Meta info: レベル補正, weight, etc. -->
         <div class="skill-stats-row">
           ${defenseTypeBadge}
           <div class="skill-level-indicator">
             ${levelIcon}
             <span>${levelTypeLabel}</span>
-            <span class="level-val">${levelVal}</span>
+            <span class="level-val">${levelBonusSign}${levelBonusVal}</span>
           </div>
           
           <div class="weight-indicator">

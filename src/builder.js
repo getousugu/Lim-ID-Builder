@@ -585,10 +585,6 @@ export function renderBuilder(container, char, onSave, onBackToList) {
             <input type="number" class="form-control skill-lvlbonus-input" value="${skill.levelBonus || 0}">
           </div>
           <div class="form-group">
-            <label>${isDefTab && skill.defenseType !== 'counter' && skill.defenseType !== 'match_counter' ? '防御レベル' : '攻撃レベル'}</label>
-            <input type="number" class="form-control skill-level-input" value="${skill.atkLevel || 40}">
-          </div>
-          <div class="form-group">
             <label>攻撃加重値</label>
             <select class="form-control skill-weight-select">
               ${weightOptionsHTML}
@@ -681,14 +677,6 @@ export function renderBuilder(container, char, onSave, onBackToList) {
           } else {
             containerAtk.style.display = 'none';
           }
-          
-          // Toggle defense/attack level label in view if needed
-          const lvlLabel = card.querySelector(".form-row-grid").children[3].querySelector("label");
-          if (skill.defenseType === 'counter' || skill.defenseType === 'match_counter') {
-            lvlLabel.textContent = "攻撃レベル";
-          } else {
-            lvlLabel.textContent = "防御レベル";
-          }
 
           saveState();
         });
@@ -713,11 +701,6 @@ export function renderBuilder(container, char, onSave, onBackToList) {
 
       card.querySelector(".skill-lvlbonus-input").addEventListener("input", (e) => {
         skill.levelBonus = parseInt(e.target.value) || 0;
-        saveState();
-      });
-
-      card.querySelector(".skill-level-input").addEventListener("input", (e) => {
-        skill.atkLevel = parseInt(e.target.value) || 0;
         saveState();
       });
 

@@ -863,36 +863,24 @@ textarea.form-control {
 /* Base power & Octagon badge on the left */
 .skill-card-left-badge-group {
   position: relative;
-  display: flex;
-  align-items: center;
   width: 110px;
-  height: 110px;
+  height: 100px;
   flex-shrink: 0;
 }
 
-.base-power-text {
-  font-size: 3.5rem;
-  font-weight: 900;
-  font-family: 'Cinzel', serif;
-  color: var(--text-primary);
-  line-height: 1;
-  position: absolute;
-  left: 0;
-  z-index: 10;
-  text-shadow: 0 0 8px rgba(0,0,0,0.8), 2px 2px 2px rgba(0,0,0,0.9);
-}
-
+/* オクタゴンは右下に配置 (上部にバッジ表示用の余白を残す) */
 .octagon-badge-container {
-  width: 80px;
-  height: 80px;
   position: absolute;
   right: 0;
+  bottom: 0;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Octagon Shape */
+/* Octagon Shape (復元) */
 .octagon-outer {
   width: 100%;
   height: 100%;
@@ -921,22 +909,38 @@ textarea.form-control {
   fill: var(--gold-primary);
 }
 
-/* Level bonus flag on top-left of octagon */
+/* 基本威力: 左側にオクタゴンと重なるように配置 */
+.base-power-text {
+  font-size: 2.2rem;
+  font-weight: 900;
+  font-family: 'Cinzel', serif;
+  color: var(--text-primary);
+  line-height: 1;
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 12;
+  text-shadow: 0 0 10px rgba(0,0,0,1), 2px 2px 4px rgba(0,0,0,1);
+}
+
+/* コイン威力バッジ: オクタゴンの上部中央に配置 */
 .level-bonus-flag {
   position: absolute;
-  top: -8px;
-  left: 20px;
+  top: 12px;
+  left: 70px;
+  transform: translateX(-50%);
   background-color: var(--accent-color);
   color: var(--text-primary);
   font-family: 'Cinzel', serif;
   font-weight: 700;
-  font-size: 0.85rem;
-  padding: 1px 6px;
+  font-size: 0.8rem;
+  padding: 1px 7px;
   clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
-  z-index: 5;
+  z-index: 15;
   box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(255,255,255,0.1);
   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  white-space: nowrap;
 }
 
 /* Small Sin hexagon below octagon */
