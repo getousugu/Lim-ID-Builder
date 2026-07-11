@@ -863,7 +863,7 @@ textarea.form-control {
 /* Base power & Octagon badge on the left */
 .skill-card-left-badge-group {
   position: relative;
-  width: 110px;
+  width: 120px;
   height: 100px;
   flex-shrink: 0;
 }
@@ -917,7 +917,7 @@ textarea.form-control {
   color: var(--text-primary);
   line-height: 1;
   position: absolute;
-  left: 4px;
+  left: 8px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 12;
@@ -928,7 +928,7 @@ textarea.form-control {
 .level-bonus-flag {
   position: absolute;
   top: 12px;
-  left: 70px;
+  left: 80px;
   transform: translateX(-50%);
   background-color: var(--accent-color);
   color: var(--text-primary);
