@@ -1,102 +1,85 @@
 /* src/dictionary.js */
 
-// Default terms to pre-populate the dictionary
-const DEFAULT_TERMS = [
-  {
-    id: "term-poise",
-    name: "呼吸",
-    type: "buff",
-    color: "#81c784", // Light green
-    description: "クリティカル確率が増加する。\nクリティカル発生時、呼吸回数を1消費し、ダメージが+20%増加する。",
-    icon: "preset-wind"
-  },
-  {
-    id: "term-bleed",
-    name: "出血",
-    type: "debuff",
-    color: "#e57373", // Light red
-    description: "コインを投げる度、出血数値分の固定ダメージを受け、出血回数が1減少する。",
-    icon: "preset-blood"
-  },
-  {
-    id: "term-burn",
-    name: "火傷",
-    type: "debuff",
-    color: "#ff8a65", // Orange-red
-    description: "ターン終了時、火傷数値分の固定ダメージを受け、火傷回数が1減少する。",
-    icon: "preset-fire"
-  },
-  {
-    id: "term-sinking",
-    name: "沈潜",
-    type: "debuff",
-    color: "#64b5f6", // Light blue
-    description: "被撃時、沈潜数値分の精神力ダメージを受け、沈潜回数が1減少する。\n(幻想体など精神力のない対象の場合は、憂鬱属性ダメージを与える)",
-    icon: "preset-sinking"
-  },
-  {
-    id: "term-tremor",
-    name: "振動",
-    type: "debuff",
-    color: "#a1887f", // Brownish/gold
-    description: "振動爆発を誘発するスキルの的中時、振動数値分だけ混乱閾値を前進させる。\nターン終了時、振動回数が1減少する。",
-    icon: "preset-tremor"
-  },
-  {
-    id: "term-rupture",
-    name: "破裂",
-    type: "debuff",
-    color: "#dce775", // Lime/yellow-green
-    description: "被撃時、破裂数値分の固定ダメージを受け、破裂回数が1減少する。",
-    icon: "preset-rupture"
-  },
-  {
-    id: "term-charge",
-    name: "充電",
-    type: "resource",
-    color: "#4dd0e1", // Cyan
-    description: "特定のスキル効果を発動するために消費される固有リソース。\nターン終了時、充電回数が1減少する。",
-    icon: "preset-charge"
-  },
-  {
-    id: "term-haste",
-    name: "クイック",
-    type: "buff",
-    color: "#ffd54f", // Gold/Amber
-    description: "次のターンの速度の最大値と最小値が数値分増加する。",
-    icon: "preset-haste"
-  },
-  {
-    id: "term-protection",
-    name: "保護",
-    type: "buff",
-    color: "#9575cd", // Purple
-    description: "このターン中、被撃時に受けるダメージ量が(数値×10)%減少する。",
-    icon: "preset-protection"
-  },
-  {
-    id: "term-dmg-up",
-    name: "ダメージ量増加",
-    type: "buff",
-    color: "#ffb74d", // Orange
-    description: "与えるダメージ量が(数値×10)%増加する。",
-    icon: "preset-dmg-up"
+import { DEFAULT_KEYWORDS } from './defaultKeywords.js';
+
+const KEYWORD_DICTIONARY_VERSION = "keywords-plus-minus-neutral-v1";
+
+const KEYWORD_TYPE_LABELS = {
+  plus: "プラス",
+  minus: "マイナス",
+  neutral: "ニュートラル"
+};
+
+const KEYWORD_TYPE_COLORS = {
+  plus: "rgb(248, 194, 0)",
+  minus: "rgb(227, 0, 0)",
+  neutral: "rgb(161, 106, 59)"
+};
+
+// HEX values for <input type="color"> (cannot accept rgb(...))
+const KEYWORD_TYPE_HEX = {
+  plus: "#f8c200",
+  minus: "#e30000",
+  neutral: "#a16a3b"
+};
+
+/**
+ * Convert an rgb(...) string or #hex string to a 6-digit #hex string.
+ * Returns the input unchanged if it doesn't match either format.
+ */
+function toHex(colorStr) {
+  if (!colorStr) return "#a16a3b";
+  // Already a valid hex
+  if (/^#[0-9A-Fa-f]{6}$/.test(colorStr)) return colorStr.toLowerCase();
+  // rgb(r, g, b)
+  const m = colorStr.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+  if (m) {
+    return '#' + [m[1], m[2], m[3]].map(n => parseInt(n).toString(16).padStart(2, '0')).join('');
   }
-];
+  return colorStr;
+}
+
+function normalizeKeywordType(type, name = "") {
+  if (type === "plus" || type === "minus" || type === "neutral") return type;
+
+  const defaultKeyword = DEFAULT_KEYWORDS.find(keyword => keyword.name === name);
+  if (defaultKeyword) return defaultKeyword.type;
+
+  if (type === "buff") return "plus";
+  if (type === "debuff" || type === "status") return "minus";
+  return "neutral";
+}
+
+function normalizeKeyword(keyword) {
+  const type = normalizeKeywordType(keyword.type, keyword.name);
+  return {
+    ...keyword,
+    type,
+    color: KEYWORD_TYPE_COLORS[type],
+    icon: keyword.icon || "default",
+    flavor: keyword.flavor || ""
+  };
+}
+
+export function getKeywordTypeLabel(type) {
+  return KEYWORD_TYPE_LABELS[normalizeKeywordType(type)] || "キーワード";
+}
 
 export function initDictionary() {
-  if (!localStorage.getItem("limbus_dictionary")) {
-    localStorage.setItem("limbus_dictionary", JSON.stringify(DEFAULT_TERMS));
+  if (localStorage.getItem("limbus_dictionary_version") !== KEYWORD_DICTIONARY_VERSION) {
+    localStorage.setItem("limbus_dictionary", JSON.stringify(DEFAULT_KEYWORDS));
+    localStorage.setItem("limbus_dictionary_version", KEYWORD_DICTIONARY_VERSION);
   }
 }
 
 export function getDictionary() {
   initDictionary();
-  return JSON.parse(localStorage.getItem("limbus_dictionary"));
+  return JSON.parse(localStorage.getItem("limbus_dictionary")).map(normalizeKeyword);
 }
 
 export function saveDictionary(dict) {
-  localStorage.setItem("limbus_dictionary", JSON.stringify(dict));
+  localStorage.setItem("limbus_dictionary", JSON.stringify(dict.map(normalizeKeyword)));
+  localStorage.setItem("limbus_dictionary_version", KEYWORD_DICTIONARY_VERSION);
 }
 
 export function addTerm(term) {
@@ -141,13 +124,19 @@ export function getTermIcon(iconName) {
   return PRESET_ICONS[iconName] || PRESET_ICONS["default"];
 }
 
-// Convert [[用語名]] in text to colorized tags with hover card triggers
+// Convert [[キーワード名]] in text to colorized tags with hover card triggers
 export function parseTermsHTML(text, inlineDict = []) {
   if (!text) return "";
   
+  // Convert newlines to <br> tags first
+  let processedText = text.replace(/\n/g, '<br>');
+  
+  // Normalize inline dict (character JSON may contain old types: buff/debuff/special/resource etc.)
+  const normalizedInlineDict = inlineDict.map(normalizeKeyword);
+
   // Combine global dictionary and identity's inline dict (inline dict has precedence)
   const globalDict = getDictionary();
-  const combinedDict = [...inlineDict, ...globalDict];
+  const combinedDict = [...normalizedInlineDict, ...globalDict];
   
   // Create a map by name to easily find terms
   const termMap = new Map();
@@ -155,12 +144,12 @@ export function parseTermsHTML(text, inlineDict = []) {
     termMap.set(term.name, term);
   });
   
-  // Replace [[用語名]]
-  return text.replace(/\[\[([^\]]+)\]\]/g, (match, termName) => {
+  // Replace [[キーワード名]]
+  return processedText.replace(/\[\[([^\]]+)\]\]/g, (match, termName) => {
     const term = termMap.get(termName);
     if (term) {
       const iconSVG = getTermIcon(term.icon);
-      return `<span class="term-link" style="color: ${term.color};" data-term-id="${term.id}" data-term-name="${term.name}" data-term-desc="${term.description.replace(/"/g, '&quot;')}" data-term-type="${term.type}">${iconSVG}${term.name}</span>`;
+      return `<span class="term-link" style="color: ${term.color};" data-term-id="${term.id}" data-term-name="${term.name}" data-term-desc="${term.description.replace(/"/g, '&quot;')}" data-term-flavor="${(term.flavor || '').replace(/"/g, '&quot;')}" data-term-type="${term.type}">${iconSVG}${term.name}</span>`;
     }
     return termName; // fallback if term not found in dictionary
   });
@@ -278,15 +267,7 @@ export function setupAutocomplete(textarea, container, inlineDict = []) {
       item.className = "autocomplete-suggestion-item";
       if (idx === activeIndex) item.classList.add("active");
       
-      const typeLabel = {
-        buff: "バフ",
-        debuff: "デバフ",
-        status: "状態異常",
-        resource: "資源",
-        item: "アイテム",
-        special: "特殊",
-        other: "その他"
-      }[term.type] || "用語";
+      const typeLabel = getKeywordTypeLabel(term.type);
 
       item.innerHTML = `
         <span style="color: ${term.color}; font-weight: 700;">${term.name}</span>
@@ -353,23 +334,22 @@ export function setupTooltips(container) {
     if (termLink) {
       const name = termLink.getAttribute("data-term-name");
       const desc = termLink.getAttribute("data-term-desc");
+      const flavor = termLink.getAttribute("data-term-flavor");
       const type = termLink.getAttribute("data-term-type");
       const color = termLink.style.color;
 
-      const typeText = {
-        buff: "バフ",
-        debuff: "デバフ",
-        status: "状態異常",
-        resource: "固有リソース",
-        item: "固有アイテム",
-        special: "特殊",
-        other: "その他"
-      }[type] || "用語";
+      const typeText = getKeywordTypeLabel(type);
+
+      let flavorHTML = "";
+      if (flavor) {
+        flavorHTML = `<div class="term-tooltip-flavor" style="font-style: italic; color: var(--text-muted); margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 6px;">${flavor}</div>`;
+      }
 
       tooltip.innerHTML = `
         <div class="term-tooltip-title" style="color: ${color};">${name}</div>
         <div class="term-tooltip-type">${typeText}</div>
         <div class="term-tooltip-desc">${desc}</div>
+        ${flavorHTML}
       `;
       
       tooltip.classList.add("visible");
@@ -419,16 +399,16 @@ export function renderDictionaryManager(modalBody) {
   
   modalBody.innerHTML = `
     <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-      <h3 style="color: var(--gold-primary);">登録用語一覧</h3>
-      <button class="btn btn-primary btn-sm" id="btn-add-new-term">+ 新規用語追加</button>
+      <h3 style="color: var(--gold-primary);">登録キーワード一覧</h3>
+      <button class="btn btn-primary btn-sm" id="btn-add-new-term">+ 新規キーワード追加</button>
     </div>
     
     <div id="term-form-container" style="display: none; background: var(--panel-bg-alt); padding: 16px; border: 1px solid var(--border-color); margin-bottom: 16px; border-radius: 4px;">
-      <h4 id="term-form-title" style="margin-bottom: 12px; color: var(--gold-primary);">新規用語登録</h4>
+      <h4 id="term-form-title" style="margin-bottom: 12px; color: var(--gold-primary);">新規キーワード登録</h4>
       <input type="hidden" id="edit-term-id">
       
       <div class="form-group">
-        <label>用語名</label>
+        <label>キーワード名</label>
         <input type="text" id="term-name-input" class="form-control" placeholder="例: 出血">
       </div>
       
@@ -436,21 +416,17 @@ export function renderDictionaryManager(modalBody) {
         <div class="form-group">
           <label>種別</label>
           <select id="term-type-input" class="form-control">
-            <option value="buff">バフ</option>
-            <option value="debuff">デバフ</option>
-            <option value="status">状態異常</option>
-            <option value="resource">固有リソース</option>
-            <option value="item">固有アイテム</option>
-            <option value="special">特殊</option>
-            <option value="other">その他</option>
+            <option value="plus">プラス</option>
+            <option value="minus">マイナス</option>
+            <option value="neutral">ニュートラル</option>
           </select>
         </div>
         
         <div class="form-group">
           <label>表示カラー</label>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="color" id="term-color-input" class="form-control" style="width: 50px; padding: 2px; height: 38px;" value="#ffd54f">
-            <input type="text" id="term-color-text" class="form-control" placeholder="#ffd54f" value="#ffd54f" style="flex: 1;">
+            <input type="color" id="term-color-input" class="form-control" style="width: 50px; padding: 2px; height: 38px;" value="#a16a3b">
+            <input type="text" id="term-color-text" class="form-control" placeholder="#ffd54f" value="rgb(161, 106, 59)" style="flex: 1;">
           </div>
         </div>
 
@@ -475,6 +451,11 @@ export function renderDictionaryManager(modalBody) {
       <div class="form-group">
         <label>効果説明テキスト</label>
         <textarea id="term-desc-input" class="form-control" placeholder="説明を入力してください..." rows="3"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>フレーバーテキスト（任意）</label>
+        <textarea id="term-flavor-input" class="form-control" placeholder="世界観・設定のフレーバーテキストを入力（任意）" rows="2"></textarea>
       </div>
       
       <div style="display: flex; justify-content: flex-end; gap: 8px;">
@@ -509,17 +490,29 @@ export function renderDictionaryManager(modalBody) {
   const colorTextInput = modalBody.querySelector("#term-color-text");
   const iconSelect = modalBody.querySelector("#term-icon-input");
   const descInput = modalBody.querySelector("#term-desc-input");
+  const flavorInput = modalBody.querySelector("#term-flavor-input");
   const tableBody = modalBody.querySelector("#dict-table-body");
   
   // Sync color colorpicker and text input
+  // <input type="color"> needs a #hex value; the save target (colorTextInput) stores the rgb(...) display string
   colorInput.addEventListener("input", (e) => {
+    // Picker gives #rrggbb → reflect in text field as-is (hex is valid CSS too)
     colorTextInput.value = e.target.value;
   });
   colorTextInput.addEventListener("input", (e) => {
-    if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-      colorInput.value = e.target.value;
+    // If user types a valid hex, update picker; rgb(...) is not accepted by type=color so leave picker
+    const hex = toHex(e.target.value);
+    if (/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+      colorInput.value = hex;
     }
   });
+  typeSelect.addEventListener("change", (e) => {
+    const normalType = normalizeKeywordType(e.target.value);
+    // Set picker to HEX, set text to rgb string
+    colorInput.value = KEYWORD_TYPE_HEX[normalType] || KEYWORD_TYPE_HEX.neutral;
+    colorTextInput.value = KEYWORD_TYPE_COLORS[normalType] || KEYWORD_TYPE_COLORS.neutral;
+  });
+
 
   function renderTable() {
     const currentDict = getDictionary();
@@ -527,15 +520,7 @@ export function renderDictionaryManager(modalBody) {
     currentDict.forEach(term => {
       const row = document.createElement("tr");
       
-      const typeLabel = {
-        buff: "バフ",
-        debuff: "デバフ",
-        status: "状態異常",
-        resource: "固有リソース",
-        item: "固有アイテム",
-        special: "特殊",
-        other: "その他"
-      }[term.type] || "用語";
+      const typeLabel = getKeywordTypeLabel(term.type);
 
       row.innerHTML = `
         <td>
@@ -565,12 +550,14 @@ export function renderDictionaryManager(modalBody) {
           editIdInput.value = term.id;
           nameInput.value = term.name;
           typeSelect.value = term.type;
-          colorInput.value = term.color;
+          // <input type="color"> requires #hex; term.color may be rgb(...)
+          colorInput.value = toHex(term.color);
           colorTextInput.value = term.color;
           iconSelect.value = term.icon || "default";
           descInput.value = term.description;
+          flavorInput.value = term.flavor || "";
           
-          formTitle.textContent = "用語の編集";
+          formTitle.textContent = "キーワードの編集";
           formContainer.style.display = "block";
         }
       });
@@ -580,7 +567,7 @@ export function renderDictionaryManager(modalBody) {
       btn.addEventListener("click", () => {
         const id = btn.getAttribute("data-id");
         const term = currentDict.find(t => t.id === id);
-        if (term && confirm(`用語「${term.name}」を削除しますか？`)) {
+        if (term && confirm(`キーワード「${term.name}」を削除しますか？`)) {
           deleteTerm(id);
           renderTable();
         }
@@ -592,13 +579,15 @@ export function renderDictionaryManager(modalBody) {
   modalBody.querySelector("#btn-add-new-term").addEventListener("click", () => {
     editIdInput.value = "";
     nameInput.value = "";
-    typeSelect.value = "buff";
-    colorInput.value = "#ffd54f";
-    colorTextInput.value = "#ffd54f";
+    typeSelect.value = "neutral";
+    // Picker requires #hex
+    colorInput.value = KEYWORD_TYPE_HEX.neutral;
+    colorTextInput.value = KEYWORD_TYPE_COLORS.neutral;
     iconSelect.value = "default";
     descInput.value = "";
+    flavorInput.value = "";
     
-    formTitle.textContent = "新規用語登録";
+    formTitle.textContent = "新規キーワード登録";
     formContainer.style.display = "block";
   });
 
@@ -611,16 +600,25 @@ export function renderDictionaryManager(modalBody) {
   modalBody.querySelector("#btn-save-term").addEventListener("click", () => {
     const name = nameInput.value.trim();
     if (!name) {
-      alert("用語名を入力してください。");
+      alert("キーワード名を入力してください。");
       return;
     }
     
+    const normalType = normalizeKeywordType(typeSelect.value, name);
+    // Color: prefer rgb(...) from text field for storage (matches existing data format);
+    // fall back to the type-default rgb if text field is only a hex or empty.
+    const rawColorText = colorTextInput.value.trim();
+    const storedColor = rawColorText.startsWith('rgb')
+      ? rawColorText
+      : KEYWORD_TYPE_COLORS[normalType];
+    
     const termData = {
       name: name,
-      type: typeSelect.value,
-      color: colorTextInput.value,
+      type: normalType,
+      color: storedColor,
       icon: iconSelect.value,
-      description: descInput.value.trim()
+      description: descInput.value.trim(),
+      flavor: flavorInput.value.trim()
     };
 
     const id = editIdInput.value;
@@ -630,7 +628,7 @@ export function renderDictionaryManager(modalBody) {
       // Check duplicate
       const currentDict = getDictionary();
       if (currentDict.some(t => t.name === name)) {
-        alert("すでに同じ名前の用語が登録されています。");
+        alert("すでに同じ名前のキーワードが登録されています。");
         return;
       }
       addTerm(termData);

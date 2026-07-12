@@ -1210,6 +1210,29 @@ textarea.form-control {
   font-weight: 700;
   color: var(--gold-primary);
 }
+
+.resonance-badge .resonance-sin-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resonance-badge .resonance-sin-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.resonance-badge.wrath .resonance-sin-icon svg { fill: #ff5252; }
+.resonance-badge.lust .resonance-sin-icon svg { fill: #ff9100; }
+.resonance-badge.sloth .resonance-sin-icon svg { fill: #ffd600; }
+.resonance-badge.gluttony .resonance-sin-icon svg { fill: #69f0ae; }
+.resonance-badge.gloom .resonance-sin-icon svg { fill: #00e5ff; }
+.resonance-badge.pride .resonance-sin-icon svg { fill: #448aff; }
+.resonance-badge.envy .resonance-sin-icon svg { fill: #e040fb; }
 .resonance-badge.wrath { background-color: rgba(183, 28, 28, 0.15); border-color: var(--sin-wrath); color: #ff5252; }
 .resonance-badge.lust { background-color: rgba(230, 81, 0, 0.15); border-color: var(--sin-lust); color: #ff9100; }
 .resonance-badge.sloth { background-color: rgba(245, 127, 23, 0.15); border-color: var(--sin-sloth); color: #ffd600; }

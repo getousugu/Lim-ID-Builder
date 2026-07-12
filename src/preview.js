@@ -60,37 +60,37 @@ export const ATTRIBUTE_ICONS = {
 // SVG Icons for Sins (Sin Affinities)
 export const SIN_ICONS = {
   wrath: `
-    <svg viewBox="0 0 24 24" style="width: 100%; height: 100%; fill: #ff5252;">
+    <svg viewBox="0 0 24 24">
       <path d="M12,2C12,2 17,7.5 17,11.5c0,2.8-2.2,5-5,5s-5-2.2-5-5C7,7.5 12,2 12,2z M12,5.5c-1,1.5-2.5,3.5-2.5,6c0,1.4,1.1,2.5,2.5,2.5s2.5-1.1,2.5-2.5C14.5,9 13,7 12,5.5z"/>
     </svg>
   `,
   lust: `
-    <svg viewBox="0 0 24 24" style="width: 100%; height: 100%; fill: #ff9100;">
+    <svg viewBox="0 0 24 24">
       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
     </svg>
   `,
   sloth: `
-    <svg viewBox="0 0 24 24" style="width: 100%; height: 100%; fill: #ffd600;">
+    <svg viewBox="0 0 24 24">
       <path d="M12.3 2a10 10 0 0 0-1.9 19.8 1 1 0 0 0 1.2-1.2 8 8 0 0 1 7.9-7.9 1 1 0 0 0 1.2-1.2A10 10 0 0 0 12.3 2z"/>
     </svg>
   `,
   gluttony: `
-    <svg viewBox="0 0 24 24" style="width: 100%; height: 100%; fill: #69f0ae;">
+    <svg viewBox="0 0 24 24">
       <path d="M17 8C17 4 12 2 12 2S7 4 7 8c0 4 5 14 5 14s5-10 5-14z M12 5c1 1.5 2 3.5 2 5c0 2.5-2 4-2 4s-2-1.5-2-4c0-1.5 1-3.5 2-5z"/>
     </svg>
   `,
   gloom: `
-    <svg viewBox="0 0 24 24" style="width: 100%; height: 100%; fill: #00e5ff;">
+    <svg viewBox="0 0 24 24">
       <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
     </svg>
   `,
   pride: `
-    <svg viewBox="0 0 24 24" style="width: 100%; height: 100%; fill: #448aff;">
+    <svg viewBox="0 0 24 24">
       <path d="M2 4l3 14h14l3-14-6 5-4-7-4 7-6-5zM17 16H7v-2h10v2z"/>
     </svg>
   `,
   envy: `
-    <svg viewBox="0 0 24 24" style="width: 100%; height: 100%; fill: #e040fb;">
+    <svg viewBox="0 0 24 24">
       <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
     </svg>
   `
@@ -360,14 +360,15 @@ function renderSkillsList(skills, inlineDict, isDefenseTab = false) {
     // Choose appropriate SVG icon silhouette
     let iconKey = skill.atkType || 'slash'; // slash, pierce, strike
     if (isDefenseTab) {
-      const type = skill.defenseType || 'defense'; // defense, evade, counter, match_guard, match_counter
+      const type = skill.defenseType || 'defense';
       if (type === 'defense') iconKey = 'defense';
       else if (type === 'evade') iconKey = 'evade';
       else if (type === 'match_guard') iconKey = 'match_guard';
-      else if (type === 'counter') iconKey = 'counter';
-      else if (type === 'match_counter') iconKey = 'match_counter';
+      // counter / match_counter: 攻撃属性アイコンをそのまま使う
+      else if (type === 'counter' || type === 'match_counter') iconKey = skill.atkType || 'slash';
     }
     const svgIcon = ATTRIBUTE_ICONS[iconKey] || ATTRIBUTE_ICONS.slash;
+    const isMatchCounter = isDefenseTab && skill.defenseType === 'match_counter';
 
     // Coins rendering
     const coinCount = parseInt(skill.coins) || 1;
@@ -479,6 +480,7 @@ function renderSkillsList(skills, inlineDict, isDefenseTab = false) {
                   </div>
                 </div>
               </div>
+              ${isMatchCounter ? '<div class="match-plus-badge">+</div>' : ''}
             </div>
             <div class="level-bonus-flag" style="background-color: ${sinColor};">
               +${skill.coinPower || '0'}
@@ -551,7 +553,7 @@ function renderPassivesList(passives) {
     const labelType = passive.type === 'resonance' ? '共鳴' : (passive.type === 'own' ? '保有' : '');
     
     const badgeHTML = hasBadge 
-      ? `<span class="${badgeClass}">${SIN_ICONS[passive.affinity]} × ${passive.count} ${labelType}</span>`
+      ? `<span class="${badgeClass}"><span class="resonance-sin-icon">${SIN_ICONS[passive.affinity]}</span> × ${passive.count} ${labelType}</span>`
       : '';
 
     return `
